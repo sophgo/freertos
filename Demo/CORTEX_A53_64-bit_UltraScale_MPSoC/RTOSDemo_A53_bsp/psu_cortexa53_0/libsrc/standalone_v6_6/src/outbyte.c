@@ -11,5 +11,6 @@ void outbyte(char c);
 #endif 
 
 void outbyte(char c) {
-	 XUartPs_SendByte(STDOUT_BASEADDRESS, c);
+	uart_putc(c);
+	 //XUartPs_SendByte(STDOUT_BASEADDRESS, c);
 }

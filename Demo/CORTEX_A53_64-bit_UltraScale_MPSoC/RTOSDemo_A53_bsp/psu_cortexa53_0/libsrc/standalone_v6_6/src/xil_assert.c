@@ -74,8 +74,9 @@ u32 Xil_AssertStatus;
  */
 s32 Xil_AssertWait = 1;
 
+void vMainAssertCalled( const char *pcFileName, uint32_t ulLineNumber );
 /* The callback function to be invoked when an assert is taken */
-static Xil_AssertCallback Xil_AssertCallbackRoutine = NULL;
+static Xil_AssertCallback Xil_AssertCallbackRoutine = vMainAssertCalled;
 
 /************************** Function Prototypes ******************************/
 

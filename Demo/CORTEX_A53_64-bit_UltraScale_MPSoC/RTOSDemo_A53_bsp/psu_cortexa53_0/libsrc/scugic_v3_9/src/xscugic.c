@@ -127,6 +127,8 @@
 #include "xil_types.h"
 #include "xil_assert.h"
 #include "xscugic.h"
+#include <sys/time.h>
+#include "cmdqueue.h"
 
 /************************** Constant Definitions *****************************/
 
@@ -327,7 +329,7 @@ static void CPUInitialize(XScuGic *InstancePtr)
 	 * 2. Set EnableS=1, to enable the CPU interface to signal secure interrupts.
 	 * Only enable the IRQ output unless secure interrupts are needed.
 	 */
-	XScuGic_CPUWriteReg(InstancePtr, XSCUGIC_CONTROL_OFFSET, 0x07U);
+	XScuGic_CPUWriteReg(InstancePtr, XSCUGIC_CONTROL_OFFSET, 0x61U);
 
 }
 
@@ -548,6 +550,7 @@ void XScuGic_Enable(XScuGic *InstancePtr, u32 Int_Id)
 	 */
 	XScuGic_DistWriteReg(InstancePtr, (u32)XSCUGIC_ENABLE_SET_OFFSET +
 						((Int_Id / 32U) * 4U), Mask);
+
 }
 
 /*****************************************************************************/
@@ -658,12 +661,15 @@ s32  XScuGic_SoftwareIntr(XScuGic *InstancePtr, u32 Int_Id, u32 Cpu_Id)
 * @note		None.
 *
 ******************************************************************************/
+extern void prvQueueISR(void);
 static void StubHandler(void *CallBackRef) {
 	/*
 	 * verify that the inputs are valid
 	 */
-	Xil_AssertVoid(CallBackRef != NULL);
+    /* need to modify to interrupt handler later*/
+    prvQueueISR();
 
+	Xil_AssertVoid(CallBackRef != NULL);
 	/*
 	 * Indicate another unhandled interrupt for stats
 	 */
@@ -701,7 +707,6 @@ void XScuGic_SetPriorityTriggerType(XScuGic *InstancePtr, u32 Int_Id,
 	u32 RegValue;
 	u8 LocalPriority;
 	LocalPriority = Priority;
-
 	Xil_AssertVoid(InstancePtr != NULL);
 	Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
 	Xil_AssertVoid(Int_Id < XSCUGIC_MAX_NUM_INTR_INPUTS);

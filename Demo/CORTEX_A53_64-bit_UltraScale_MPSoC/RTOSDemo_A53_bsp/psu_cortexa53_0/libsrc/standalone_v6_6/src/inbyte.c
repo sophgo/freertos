@@ -7,8 +7,9 @@ extern "C" {
 char inbyte(void);
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 char inbyte(void) {
-	 return XUartPs_RecvByte(STDIN_BASEADDRESS);
+	uart_getc();
+	//return XUartPs_RecvByte(STDIN_BASEADDRESS);
 }

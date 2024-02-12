@@ -34,6 +34,7 @@
 #include "xil_cache.h"
 
 #include "platform_config.h"
+#include "uart_dw.h"
 
 /*
  * Uncomment one of the following two lines, depending on the target,
@@ -50,37 +51,9 @@
 #endif
 
 void
-enable_caches()
-{
-#ifdef __PPC__
-    Xil_ICacheEnableRegion(CACHEABLE_REGION_MASK);
-    Xil_DCacheEnableRegion(CACHEABLE_REGION_MASK);
-#elif __MICROBLAZE__
-#ifdef XPAR_MICROBLAZE_USE_ICACHE
-    Xil_ICacheEnable();
-#endif
-#ifdef XPAR_MICROBLAZE_USE_DCACHE
-    Xil_DCacheEnable();
-#endif
-#endif
-}
-
-void
-disable_caches()
-{
-#ifdef __MICROBLAZE__
-#ifdef XPAR_MICROBLAZE_USE_DCACHE
-    Xil_DCacheDisable();
-#endif
-#ifdef XPAR_MICROBLAZE_USE_ICACHE
-    Xil_ICacheDisable();
-#endif
-#endif
-}
-
-void
 init_uart()
 {
+    uart_init();
 #ifdef STDOUT_IS_16550
     XUartNs550_SetBaud(STDOUT_BASEADDR, XPAR_XUARTNS550_CLOCK_HZ, UART_BAUD);
     XUartNs550_SetLineControlReg(STDOUT_BASEADDR, XUN_LCR_8_DATA_BITS);

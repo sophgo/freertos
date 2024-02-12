@@ -66,6 +66,8 @@
  *
  * When mainSELECTED_APPLICATION is set to 1 the comprehensive test and demo
  * application will be run.
+ *
+ * When mainSELECTED_APPLICATION is set to 2 the posix application will be run.
  */
 #define mainSELECTED_APPLICATION	1
 
@@ -84,6 +86,8 @@ static void prvSetupHardware( void );
 	extern void main_blinky( void );
 #elif ( mainSELECTED_APPLICATION == 1 )
 	extern void main_full( void );
+#elif ( mainSELECTED_APPLICATION == 2 )
+	extern void main_posix( void );
 #else
 	#error Invalid mainSELECTED_APPLICATION setting.  See the comments at the top of this file and above the mainSELECTED_APPLICATION definition.
 #endif
@@ -107,9 +111,14 @@ int main( void )
 {
 	/* See http://www.FreeRTOS.org/RTOS-Xilinx-UltraScale_MPSoC_64-bit.html for
 	additional information on this demo. */
-
+	system_init();
+        xil_printf("Build Date:%s  (Time :%s) \n", __DATE__ , __TIME__);
+        xil_printf("enable I/D cache & MMU\n");
+        enable_caches();
+        xil_printf("enable I/D cache & MMU done\n");
 	/* Configure the hardware ready to run the demo. */
 	prvSetupHardware();
+
 
 	/* The mainSELECTED_APPLICATION setting is described at the top
 	of this file. */
@@ -120,6 +129,10 @@ int main( void )
 	#elif( mainSELECTED_APPLICATION == 1 )
 	{
 		main_full();
+	}
+	#elif ( mainSELECTED_APPLICATION == 2 )
+	{
+		main_posix();
 	}
 	#endif
 

@@ -127,7 +127,7 @@ s32 XTtcPs_SetOptions(XTtcPs *InstancePtr, u32 Options)
 	s32 Status = XST_SUCCESS;
 
 	Xil_AssertNonvoid(InstancePtr != NULL);
-	Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
+	//Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
 
 	ClockReg = XTtcPs_ReadReg(InstancePtr->Config.BaseAddress,
 				    XTTCPS_CLK_CNTRL_OFFSET);

@@ -23,13 +23,13 @@ $(PROCESSOR)/lib/libxil.a: $(PROCESSOR)/lib/libxil_init.a
 
 %/make.include: $(if $(wildcard $(PROCESSOR)/lib/libxil_init.a),$(PROCESSOR)/lib/libxil.a,)
 	@echo "Running Make include in $(subst /make.include,,$@)"
-	$(MAKE) -C $(subst /make.include,,$@) -s include  "SHELL=$(SHELL)" "COMPILER=aarch64-none-elf-gcc" "ARCHIVER=aarch64-none-elf-ar" "COMPILER_FLAGS=  -O2 -c" "EXTRA_COMPILER_FLAGS=-g -Wall -Wextra -DFREERTOS_BSP"
+	$(MAKE) -C $(subst /make.include,,$@) include  "SHELL=$(SHELL)" "COMPILER=aarch64-elf-gcc" "ARCHIVER=aarch64-elf-ar" "COMPILER_FLAGS=  -O2 -c -ffunction-sections -fdata-sections" "EXTRA_COMPILER_FLAGS=-g -Wall -Wextra -DFREERTOS_BSP"
 
 %/make.libs: include
 	@echo "Running Make libs in $(subst /make.libs,,$@)"
-	$(MAKE) -C $(subst /make.libs,,$@) -s libs  "SHELL=$(SHELL)" "COMPILER=aarch64-none-elf-gcc" "ARCHIVER=aarch64-none-elf-ar" "COMPILER_FLAGS=  -O2 -c" "EXTRA_COMPILER_FLAGS=-g -Wall -Wextra -DFREERTOS_BSP"
+	$(MAKE) -C $(subst /make.libs,,$@) libs  "SHELL=$(SHELL)" "COMPILER=aarch64-elf-gcc" "ARCHIVER=aarch64-elf-ar" "COMPILER_FLAGS=  -O2 -c -ffunction-sections -fdata-sections" "EXTRA_COMPILER_FLAGS=-g -Wall -Wextra -DFREERTOS_BSP"
 
-%/make.clean: 
-	$(MAKE) -C $(subst /make.clean,,$@) -s clean 
+%/make.clean:
+	$(MAKE) -C $(subst /make.clean,,$@) -s clean
 clean:
 	rm -f ${PROCESSOR}/lib/libxil.a

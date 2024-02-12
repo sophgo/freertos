@@ -48,8 +48,10 @@ uint8_t ucPrescale;
 const uint8_t ucLevelSensitive = 1;
 extern XScuGic xInterruptController;
 
-	pxTimerConfiguration = XTtcPs_LookupConfig( XPAR_XTTCPS_3_DEVICE_ID );
+	pxTimerConfiguration = XTtcPs_LookupConfig( XPAR_XTTCPS_0_DEVICE_ID );
+	configASSERT( pxTimerConfiguration );
 
+#if 0
 	/* Initialise the device. */
 	xStatus = XTtcPs_CfgInitialize( &xRTOSTickTimerInstance, pxTimerConfiguration, pxTimerConfiguration->BaseAddress );
 
@@ -71,22 +73,19 @@ extern XScuGic xInterruptController;
 	/* Set the interval and prescale. */
 	XTtcPs_SetInterval( &xRTOSTickTimerInstance, usInterval );
 	XTtcPs_SetPrescaler( &xRTOSTickTimerInstance, ucPrescale );
-
+#endif
 	/* The priority must be the lowest possible. */
-	XScuGic_SetPriorityTriggerType( &xInterruptController, XPAR_XTTCPS_3_INTR, portLOWEST_USABLE_INTERRUPT_PRIORITY << portPRIORITY_SHIFT, ucLevelSensitive );
+	XScuGic_SetPriorityTriggerType( &xInterruptController, CNTP_TIMER_0_INT_ID, portLOWEST_USABLE_INTERRUPT_PRIORITY << portPRIORITY_SHIFT, ucLevelSensitive );
 
 	/* Connect to the interrupt controller. */
-	xStatus = XScuGic_Connect( &xInterruptController, XPAR_XTTCPS_3_INTR, (Xil_ExceptionHandler) FreeRTOS_Tick_Handler, ( void * ) &xRTOSTickTimerInstance );
+	xStatus = XScuGic_Connect( &xInterruptController, CNTP_TIMER_0_INT_ID, (Xil_ExceptionHandler) FreeRTOS_Tick_Handler, ( void * ) &xRTOSTickTimerInstance );
 	configASSERT( xStatus == XST_SUCCESS);
 
 	/* Enable the interrupt in the GIC. */
-	XScuGic_Enable( &xInterruptController, XPAR_XTTCPS_3_INTR );
+	XScuGic_Enable( &xInterruptController, CNTP_TIMER_0_INT_ID );
 
-	/* Enable the interrupts in the timer. */
-	XTtcPs_EnableInterrupts( &xRTOSTickTimerInstance, XTTCPS_IXR_INTERVAL_MASK );
-
-	/* Start the timer. */
-	XTtcPs_Start( &xRTOSTickTimerInstance );
+	/* Enable the interrupts in the timer and sart the timer. */
+	XTime_StartTimer();
 }
 /*-----------------------------------------------------------*/
 
@@ -95,10 +94,18 @@ void vClearTickInterrupt( void )
 volatile uint32_t ulInterruptStatus;
 
 	/* Read the interrupt status, then write it back to clear the interrupt. */
-	ulInterruptStatus = XTtcPs_GetInterruptStatus( &xRTOSTickTimerInstance );
-	XTtcPs_ClearInterruptStatus( &xRTOSTickTimerInstance, ulInterruptStatus );
+	//ulInterruptStatus = XTtcPs_GetInterruptStatus( &xRTOSTickTimerInstance );
+	//XTtcPs_ClearInterruptStatus( &xRTOSTickTimerInstance, ulInterruptStatus );
+	/* hardcore now, need to implement later*/
+        int* gicd_icpend_addr = 0x1F01280;
+        int* gicc_eoir_addr   = 0x1F02010;
+        *gicc_eoir_addr = 30;
+        *gicd_icpend_addr=0x40000000;
+
 	__asm volatile( "DSB SY" );
 	__asm volatile( "ISB SY" );
+        // reset tick
+        XTime_ResetTimer();
 }
 /*-----------------------------------------------------------*/
 

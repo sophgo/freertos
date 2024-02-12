@@ -51,7 +51,6 @@ __attribute__((weak)) sint32
 write (sint32 fd, char8* buf, sint32 nbytes)
 
 {
-#ifdef STDOUT_BASEADDRESS
   s32 i;
   char8* LocalBuf = buf;
 
@@ -71,12 +70,6 @@ write (sint32 fd, char8* buf, sint32 nbytes)
 	}
   }
   return (nbytes);
-#else
-  (void)fd;
-  (void)buf;
-  (void)nbytes;
-  return 0;
-#endif
 }
 
 __attribute__((weak)) sint32
@@ -90,7 +83,6 @@ _write (sint32 fd, char8* buf, sint32 nbytes)
 	length = XPVXenConsole_Write(buf);
 	return length;
 #else
-#ifdef STDOUT_BASEADDRESS
   s32 i;
   char8* LocalBuf = buf;
 
@@ -110,12 +102,6 @@ _write (sint32 fd, char8* buf, sint32 nbytes)
 	}
   }
   return (nbytes);
-#else
-  (void)fd;
-  (void)buf;
-  (void)nbytes;
-  return 0;
-#endif
 #endif
 }
 #endif

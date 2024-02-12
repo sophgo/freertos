@@ -21,7 +21,9 @@
 
 void print(const char8 *ptr)
 {
-#if HYP_GUEST && EL1_NONSECURE && XEN_USE_PV_CONSOLE
+	uart_puts(*ptr);
+
+/*#if HYP_GUEST && EL1_NONSECURE && XEN_USE_PV_CONSOLE
 	XPVXenConsole_Write(ptr);
 #else
 #ifdef STDOUT_BASEADDRESS
@@ -32,5 +34,5 @@ void print(const char8 *ptr)
 #else
 (void)ptr;
 #endif
-#endif
+#endif*/
 }

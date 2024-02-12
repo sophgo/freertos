@@ -69,14 +69,14 @@
 
 /* Xilinx includes. */
 #include "xil_printf.h"
-
+#include "cmdqueue.h"
 /* Priorities at which the tasks are created. */
 #define mainQUEUE_RECEIVE_TASK_PRIORITY		( tskIDLE_PRIORITY + 2 )
 #define	mainQUEUE_SEND_TASK_PRIORITY		( tskIDLE_PRIORITY + 1 )
 
 /* The rate at which data is sent to the queue.  The 200ms value is converted
 to ticks using the portTICK_PERIOD_MS constant. */
-#define mainQUEUE_SEND_FREQUENCY_MS			pdMS_TO_TICKS( 200 )
+#define mainQUEUE_SEND_FREQUENCY_MS			pdMS_TO_TICKS( 5000 )
 
 /* The number of items the queue can hold.  This is 1 as the receive task
 will remove items as they are added, meaning the send task should always find
@@ -90,20 +90,32 @@ the queue empty. */
  */
 static void prvQueueReceiveTask( void *pvParameters );
 static void prvQueueSendTask( void *pvParameters );
+static void prvISPRunTask( void *pvParameters );
+static void prvVcodecRunTask( void *pvParameters );
+static void prvVpssRunTask( void *pvParameters );
+static void prvCmdQuRunTask( void *pvParameters );
 
 /*-----------------------------------------------------------*/
 
 /* The queue used by both tasks. */
 static QueueHandle_t xQueue = NULL;
+static QueueHandle_t xQueueIsp = NULL;
+static QueueHandle_t xQueueVcodec = NULL;
+static QueueHandle_t xQueueVpss = NULL;
+static QueueHandle_t xQueueCmdqu = NULL;
 
 /*-----------------------------------------------------------*/
 
 void main_blinky( void )
 {
 	/* Create the queue. */
-	xQueue = xQueueCreate( mainQUEUE_LENGTH, sizeof( uint32_t ) );
+	xQueue       = xQueueCreate( mainQUEUE_LENGTH, sizeof( uint32_t ) );
+    xQueueIsp    = xQueueCreate( mainQUEUE_LENGTH, sizeof( cmdqu_t ) );
+    xQueueVcodec = xQueueCreate( mainQUEUE_LENGTH, sizeof( cmdqu_t ) );
+    xQueueVpss   = xQueueCreate( mainQUEUE_LENGTH, sizeof( cmdqu_t ) );
+    xQueueCmdqu  = xQueueCreate( mainQUEUE_LENGTH, sizeof( cmdqu_t ) );
 
-	if( xQueue != NULL )
+	if( xQueue != NULL && xQueueIsp != NULL && xQueueVcodec != NULL && xQueueVpss != NULL)
 	{
 		/* Start the two tasks as described in the comments at the top of this
 		file. */
@@ -115,6 +127,12 @@ void main_blinky( void )
 					NULL );								/* The task handle is not required, so NULL is passed. */
 
 		xTaskCreate( prvQueueSendTask, "TX", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
+
+		xTaskCreate( prvISPRunTask, "ISP", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
+		xTaskCreate( prvVcodecRunTask, "Vcodec", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
+		xTaskCreate( prvVpssRunTask, "Vpss", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
+
+		xTaskCreate( prvCmdQuRunTask, "Vpss", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
 
 		/* Start the tasks and timer running. */
 		vTaskStartScheduler();
@@ -131,7 +149,77 @@ void main_blinky( void )
 	for( ;; );
 }
 /*-----------------------------------------------------------*/
+static void prvCmdQuRunTask( void *pvParameters )
+{
+	/* Remove compiler warning about unused parameter. */
+	( void ) pvParameters;
+    cmdqu_t rtos_cmdq;
 
+    struct shm_para_t *shm_para = 0x120000040;
+    xil_printf("prvCmdQuRunTask run\n");
+
+    for( ;; )
+    {
+        xQueueReceive( xQueueCmdqu, &rtos_cmdq, portMAX_DELAY );
+        /* send command to linux*/
+        queue_enqueue(&shm_para->rtos_cmd_queue, &rtos_cmdq);
+        volatile int * addr=0x1F01F00;
+        *addr=0x10008;
+        asm volatile("dsb sy;");
+        asm volatile("isb sy;");
+    }
+}
+static void prvISPRunTask( void *pvParameters )
+{
+	/* Remove compiler warning about unused parameter. */
+	( void ) pvParameters;
+    cmdqu_t rtos_cmdq;
+    xil_printf("prvISPRunTask run\n");
+
+    for( ;; )
+    {
+        xQueueReceive( xQueueIsp, &rtos_cmdq, portMAX_DELAY );
+        xil_printf("prvISPRunTask id=%d cmd=%d para=%lx\n", rtos_cmdq.ip_id, rtos_cmdq.cmd_id, rtos_cmdq.param_ptr);
+        if(rtos_cmdq.ip_id ==0) {
+		    xQueueSend( xQueueCmdqu, &rtos_cmdq, 0U );
+        }
+        rtos_cmdq.ip_id = -1;
+    }
+}
+static void prvVcodecRunTask( void *pvParameters )
+{
+    /* Remove compiler warning about unused parameter. */
+	( void ) pvParameters;
+
+    xil_printf("prvVcodecRunTask run\n");
+    cmdqu_t rtos_cmdq;
+    for( ;; )
+    {
+        xQueueReceive( xQueueVcodec, &rtos_cmdq, portMAX_DELAY );
+        xil_printf("prvVcodecRunTask id=%d cmd=%d para=%lx\n", rtos_cmdq.ip_id, rtos_cmdq.cmd_id, rtos_cmdq.param_ptr);
+        if(rtos_cmdq.ip_id == 1) {
+		    xQueueSend( xQueueCmdqu, &rtos_cmdq, 0U );
+        }
+        rtos_cmdq.ip_id = -1;
+    }
+}
+static void prvVpssRunTask( void *pvParameters )
+{
+    /* Remove compiler warning about unused parameter. */
+	( void ) pvParameters;
+
+    xil_printf("prvVpssRunTask run\n");
+    cmdqu_t rtos_cmdq;
+    for( ;; )
+    {
+        xQueueReceive( xQueueVpss, &rtos_cmdq, portMAX_DELAY );
+        xil_printf("prvVpssRunTask id=%d cmd=%d para=%lx\n", rtos_cmdq.ip_id, rtos_cmdq.cmd_id, rtos_cmdq.param_ptr);
+        if(rtos_cmdq.ip_id == 2) {
+		    xQueueSend( xQueueCmdqu, &rtos_cmdq, 0U );
+        }
+        rtos_cmdq.ip_id = -1;
+    }
+}
 static void prvQueueSendTask( void *pvParameters )
 {
 TickType_t xNextWakeTime;
@@ -181,5 +269,52 @@ const uint32_t ulExpectedValue = 100UL;
 		}
 	}
 }
+enum IP_TYPE{
+    IP_ISP,
+    IP_VCODEC,
+    IP_VPSS,
+};
 /*-----------------------------------------------------------*/
 
+void prvQueueISR(void)
+{
+    xil_printf("prvQueueISR\n");
+    struct shm_para_t *shm_para = 0x120000040;
+    queue_t *linux_cmd_queue = &shm_para->linux_cmd_queue;
+    xil_printf("buffer =%lx\n",((unsigned long)shm_para->linux_cmd_queue.queue_buffer));
+    xil_printf("offset =%lx\n", shm_para->virt_phys_offset);
+    xil_printf("queue  =%lx\n", linux_cmd_queue);
+
+    while(!queue_is_empty(linux_cmd_queue))
+    {
+        /* receive command from linux*/
+        cmdqu_t * cmdq;
+        cmdqu_t rtos_cmdq;
+        cmdq = queue_peek(linux_cmd_queue);
+        xil_printf("cmdq id = %lx\n", cmdq->ip_id);
+        xil_printf("cmdq cmd = %lx\n", cmdq->cmd_id);
+        xil_printf("cmdq param = %lx\n", cmdq->param_ptr);
+
+        rtos_cmdq.ip_id = cmdq->ip_id;
+        rtos_cmdq.cmd_id = cmdq->cmd_id;
+        rtos_cmdq.param_ptr = cmdq->param_ptr;
+
+        queue_dequeue(linux_cmd_queue);
+        switch (rtos_cmdq.ip_id) {
+            case IP_ISP:
+//                if(!xQueueIsQueueFullFromISR(xQueueIsp))
+                xQueueSendFromISR( xQueueIsp, &rtos_cmdq, 0U );
+//                else
+//                    xil_printf("ISP Queue is full\n");
+                break;
+            case IP_VCODEC:
+                xQueueSendFromISR( xQueueVcodec, &rtos_cmdq, 0U );
+                break;
+            case IP_VPSS:
+                xQueueSendFromISR( xQueueVpss, &rtos_cmdq, 0U );
+                break;
+            default:
+                break;
+        }
+    }
+}

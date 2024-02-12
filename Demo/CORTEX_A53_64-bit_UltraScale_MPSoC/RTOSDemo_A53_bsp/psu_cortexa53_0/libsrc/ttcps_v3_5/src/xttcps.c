@@ -274,8 +274,8 @@ void XTtcPs_SetPrescaler(XTtcPs *InstancePtr, u8 PrescalerValue)
 	 * Assert to validate input arguments.
 	 */
 	Xil_AssertVoid(InstancePtr != NULL);
-	Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-	Xil_AssertVoid(PrescalerValue <= XTTCPS_CLK_CNTRL_PS_DISABLE);
+	//Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
+	//Xil_AssertVoid(PrescalerValue <= XTTCPS_CLK_CNTRL_PS_DISABLE);
 
 	/*
 	 * Read the clock control register

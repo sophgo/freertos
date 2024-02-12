@@ -108,7 +108,7 @@
 #define mainDONT_BLOCK						( ( TickType_t ) 0 )
 
 /* The period of the check task, in ms. */
-#define mainNO_ERROR_CHECK_TASK_PERIOD		pdMS_TO_TICKS( ( TickType_t ) 5000 )
+#define mainNO_ERROR_CHECK_TASK_PERIOD		pdMS_TO_TICKS( ( TickType_t ) 20000 )
 
 /* Parameters that are passed into the register check tasks solely for the
 purpose of ensuring parameters are passed into tasks correctly. */
@@ -178,7 +178,9 @@ void main_full( void )
 	/* Start all the other standard demo/test tasks.  They have no particular
 	functionality, but do demonstrate how to use the FreeRTOS API and test the
 	kernel port. */
+	#if 0 //There are not 3 timers to trigger interrupt
 	vStartInterruptQueueTasks();
+	#endif
 	vStartDynamicPriorityTasks();
 	vCreateBlockTimeTasks();
 	vStartCountingSemaphoreTasks();
@@ -245,11 +247,13 @@ const char *pcStatusString = "Pass";
 
 		/* Check all the demo tasks (other than the flash tasks) to ensure
 		that they are all still running, and that none have detected an error. */
+		#if 0 //There are not 3 timers to trigger interrupt
 		if( xAreIntQueueTasksStillRunning() != pdTRUE )
 		{
 			ullErrorFound |= 1ULL << 0ULL;
 			pcStatusString = "Error: IntQ";
 		}
+		#endif
 
 		if( xAreMathsTaskStillRunning() != pdTRUE )
 		{

@@ -84,22 +84,35 @@
 *			it simply exits.
 *
 ****************************************************************************/
+
+/* Timer 250Hz in arch timer 25 MHz.*/
+#define TimerInterval 0x186A0
+
+void XTime_ResetTimer()
+{
+        u64 TimerValue;
+        TimerValue=mfcp(CNTPCT_EL0);
+        /* Timer 250Hz in arch timer 25MHz.*/
+        TimerValue += TimerInterval;
+        mtcp(CNTP_CVAL_EL0, TimerValue);
+}
+
 void XTime_StartTimer(void)
 {
-	if (EL3 == 1){
-		/* Enable the global timer counter only if it is disabled */
-		if(((Xil_In32(XIOU_SCNTRS_BASEADDR + XIOU_SCNTRS_CNT_CNTRL_REG_OFFSET))
-					& XIOU_SCNTRS_CNT_CNTRL_REG_EN_MASK) !=
-					XIOU_SCNTRS_CNT_CNTRL_REG_EN){
-			/*write frequency to System Time Stamp Generator Register*/
-			Xil_Out32((XIOU_SCNTRS_BASEADDR + XIOU_SCNTRS_FREQ_REG_OFFSET),
-					XIOU_SCNTRS_FREQ);
-			/*Enable the timer/counter*/
-			Xil_Out32((XIOU_SCNTRS_BASEADDR + XIOU_SCNTRS_CNT_CNTRL_REG_OFFSET)
-						,XIOU_SCNTRS_CNT_CNTRL_REG_EN);
-		}
-	}
+	u32 CtlReg;
+	/* Reset Timer compare value*/
+	XTime_ResetTimer();
+
+        /* unmask timer*/
+        CtlReg=mfcp(CNTP_CTL_EL0);
+        CtlReg &= ~2;
+
+	/* Enable timer */
+        CtlReg |= 0x1;
+	mtcp(CNTP_CTL_EL0, CtlReg);
+
 }
+
 /****************************************************************************/
 /**
 * @brief	Timer of A53 runs continuously and the time can not be set as

@@ -83,8 +83,8 @@ _startup:
 	mov	x0, #0
 .if (EL3 == 1)
 	/* Check whether the clearing of bss sections shall be skipped */
-	ldr	x10, =APU_PWRCTL	/* Load PWRCTRL address */
-	ldr	w11, [x10]		/* Read PWRCTRL register */
+	//ldr	x10, =APU_PWRCTL	/* Load PWRCTRL address */
+	//ldr	w11, [x10]		/* Read PWRCTRL register */
 	mrs	x2, MPIDR_EL1		/* Read MPIDR_EL1 */
 	ubfx	x2, x2, #0, #8		/* Extract CPU ID (affinity level 0) */
 	mov	w1, #1

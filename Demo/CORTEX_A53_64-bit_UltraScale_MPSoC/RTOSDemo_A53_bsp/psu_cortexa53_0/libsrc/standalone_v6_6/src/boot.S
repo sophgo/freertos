@@ -173,6 +173,7 @@ EndlessLoop0:
 	wfi
 	b        EndlessLoop0
 #endif
+	bl	el2_setup			// Drop to EL1, w0=cpu_boot_mode
 OKToRun:
 
 	mrs	x0, currentEL
@@ -289,7 +290,7 @@ InitEL3:
 	/* Enable SError Exception for asynchronous abort */
 	mrs 	x1,DAIF
 	bic	x1,x1,#(0x1<<8)
-        msr	DAIF,x1
+	msr	DAIF,x1
 
 	/* Configure SCTLR_EL3 */
 	mov      x1, #0                //Most of the SCTLR_EL3 bits are unknown at reset
@@ -312,10 +313,27 @@ InitEL1:
 	ldr	x1, =vector_base
 	msr	VBAR_EL1,x1
 
+/* Disable Trap floating point access. */
 	mrs	x0, CPACR_EL1
-	bic	x0, x0, #(0x3 << 0x20)
+	orr	x0, x0, #(0x3 << 20)
 	msr	CPACR_EL1, x0
 	isb
+
+        mov     x1,#0x0
+#        #disable MMU & I/D cache
+#        mrs     x0, SCTLR_EL1
+#        # mmu
+#        bic     x0, x0, #(1<<0)
+#        # dcache
+#        bic     x0, x0, #(1<<2)
+#        # icache
+#        bic     x0, x0, #(1<<12)
+#        msr     SCTLR_EL1, x0
+#        isb
+
+        bl __asm_invalidate_tlb_all
+        bl __asm_invalidate_icache_all
+        bl __asm_invalidate_dcache_all
 
 	/*
 	 * Clear FPUStatus variable to make sure that it contains current
@@ -339,7 +357,7 @@ InitEL1:
 	TLBI    VMALLE1
 
 	ic      IALLU                  	//; Invalidate I cache to PoU
-	bl 	invalidate_dcaches
+	//bl 	invalidate_dcaches
 	dsb	 sy
 	isb
 
@@ -372,16 +390,7 @@ InitEL1:
         bic	x1,x1,#(0x1<<8)
         msr	DAIF,x1
 
-	//; Enable MMU
-	mov	x1,#0x0
-	orr     x1, x1, #(1 << 18)    // ; Set WFE non trapping
-	orr     x1, x1, #(1 << 17)    // ; Set WFI non trapping
-	orr     x1, x1, #(1 << 5)    // ; Set CP15 barrier enabled
-	orr     x1, x1, #(1 << 12)    // ; Set I bit
-	orr     x1, x1, #(1 << 2)    // ; Set C bit
-	orr     x1, x1, #(1 << 0)    // ; Set M bit
-	msr     SCTLR_EL1, x1
-	isb
+
 
 	bl 	 _startup		//jump to start
 .else
@@ -439,6 +448,161 @@ invalidateCaches_next_level:
 
 invalidateCaches_end:
 	ret
+
+.set BOOT_CPU_MODE_EL1,	(0xe11)
+.set BOOT_CPU_MODE_EL2,	(0xe12)
+/* Hyp Configuration Register (HCR) bits */
+.set HCR_E2H,         ((1) << 34)
+.set HCR_TGE,         ((1) << 27)
+
+/* AArch64 SPSR bits */
+.set PSR_F_BIT,	0x00000040
+.set PSR_I_BIT,	0x00000080
+.set PSR_A_BIT,	0x00000100
+.set PSR_D_BIT,	0x00000200
+.set PSR_MODE_EL1h,	0x00000005
+.set CurrentEL_EL2,		(2 << 2)
+.set HCR_RW,		((1) << 31)
+
+/*
+ * If we're fortunate enough to boot at EL2, ensure that the world is
+ * sane before dropping to EL1.
+ *
+ * Returns either BOOT_CPU_MODE_EL1 or BOOT_CPU_MODE_EL2 in x20 if
+ * booted in EL1 or EL2 respectively.
+ */
+.global el2_setup;
+el2_setup:
+	mrs	x0, CurrentEL
+	cmp	x0, #CurrentEL_EL2
+	b.ne	1f
+	mrs	x0, sctlr_el2
+	orr	x0, x0, #(1 << 25)		// Set the EE bit for EL2
+	bic	x0, x0, #(1 << 25)		// Clear the EE bit for EL2
+	msr	sctlr_el2, x0
+	b	2f
+1:	mrs	x0, sctlr_el1
+	orr	x0, x0, #(3 << 24)		// Set the EE and E0E bits for EL1
+	bic	x0, x0, #(3 << 24)		// Clear the EE and E0E bits for EL1
+	msr	sctlr_el1, x0
+	mov	w0, #BOOT_CPU_MODE_EL1		// This cpu booted in EL1
+	isb
+	ret
+
+2:
+#ifdef CONFIG_ARM64_VHE
+	/*
+	 * Check for VHE being present. For the rest of the EL2 setup,
+	 * x2 being non-zero indicates that we do have VHE, and that the
+	 * kernel is intended to run at EL2.
+	 */
+	mrs	x2, id_aa64mmfr1_el1
+	ubfx	x2, x2, #8, #4
+#else
+	mov	x2, xzr
+#endif
+
+	/* Hyp configuration. */
+	mov	x0, #HCR_RW			// 64-bit EL1
+	cbz	x2, set_hcr
+	orr	x0, x0, #HCR_TGE		// Enable Host Extensions
+	orr	x0, x0, #HCR_E2H
+set_hcr:
+	msr	hcr_el2, x0
+	isb
+
+	/* Generic timers. */
+	mrs	x0, cnthctl_el2
+	orr	x0, x0, #3			// Enable EL1 physical timers
+	msr	cnthctl_el2, x0
+	msr	cntvoff_el2, xzr		// Clear virtual offset
+
+#ifdef CONFIG_ARM_GIC_V3
+	/* GICv3 system register access */
+	mrs	x0, id_aa64pfr0_el1
+	ubfx	x0, x0, #24, #4
+	cmp	x0, #1
+	b.ne	3f
+
+	mrs_s	x0, ICC_SRE_EL2
+	orr	x0, x0, #ICC_SRE_EL2_SRE	// Set ICC_SRE_EL2.SRE==1
+	orr	x0, x0, #ICC_SRE_EL2_ENABLE	// Set ICC_SRE_EL2.Enable==1
+	msr_s	ICC_SRE_EL2, x0
+	isb					// Make sure SRE is now set
+	mrs_s	x0, ICC_SRE_EL2			// Read SRE back,
+	tbz	x0, #0, 3f			// and check that it sticks
+	msr_s	ICH_HCR_EL2, xzr		// Reset ICC_HCR_EL2 to defaults
+
+3:
+#endif
+
+	/* Populate ID registers. */
+	mrs	x0, midr_el1
+	mrs	x1, mpidr_el1
+	msr	vpidr_el2, x0
+	msr	vmpidr_el2, x1
+
+	/*
+	 * When VHE is not in use, early init of EL2 and EL1 needs to be
+	 * done here.
+	 * When VHE _is_ in use, EL1 will not be used in the host and
+	 * requires no configuration, and all non-hyp-specific EL2 setup
+	 * will be done via the _EL1 system register aliases in __cpu_setup.
+	 */
+	cbnz	x2, 1f
+
+	/* sctlr_el1 */
+	mov	x0, #0x0800			// Set/clear RES{1,0} bits
+	//movk	x0, #0x33d0, lsl #16		// Set EE and E0E on BE systems
+	//movk	x0, #0x30d0, lsl #16		// Clear EE and E0E on LE systems
+	msr	sctlr_el1, x0
+
+	/* Coprocessor traps. */
+	mov	x0, #0x33ff
+	msr	cptr_el2, x0			// Disable copro. traps to EL2
+1:
+
+#ifdef CONFIG_COMPAT
+	msr	hstr_el2, xzr			// Disable CP15 traps to EL2
+#endif
+
+	/* EL2 debug */
+	mrs	x0, id_aa64dfr0_el1		// Check ID_AA64DFR0_EL1 PMUVer
+	sbfx	x0, x0, #8, #4
+	cmp	x0, #1
+	b.lt	4f				// Skip if no PMU present
+	mrs	x0, pmcr_el0			// Disable debug access traps
+	ubfx	x0, x0, #11, #5			// to EL2 and allow access to
+4:
+	csel	x0, xzr, x0, lt			// all PMU counters from EL1
+	msr	mdcr_el2, x0			// (if they exist)
+
+	/* Stage-2 translation */
+	msr	vttbr_el2, xzr
+
+	cbz	x2, install_el2_stub
+
+	mov	w0, #BOOT_CPU_MODE_EL2		// This CPU booted in EL2
+	isb
+	ret
+
+install_el2_stub:
+	/* Hypervisor stub */
+	//adrp	x0, __hyp_stub_vectors
+	//add	x0, x0, #:lo12:__hyp_stub_vectors
+	//msr	vbar_el2, x0
+
+	/* spsr */
+	mov	x0, #(PSR_F_BIT | PSR_I_BIT | PSR_A_BIT | PSR_D_BIT |\
+		      PSR_MODE_EL1h)
+	msr	spsr_el2, x0
+	//msr	elr_el2, lr
+	msr	elr_el2, x30 // Need to change to r14 if 32bit mode
+	mov	w0, #BOOT_CPU_MODE_EL2		// This CPU booted in EL2
+	eret
+.type el2_setup, %function;
+.end el2_setup;
+.size el2_setup,.-el2_setup
 
 .end
 /**

@@ -136,6 +136,7 @@ const uint8_t ucRisingEdge = 3;
 		pxTimerConfiguration = XTtcPs_LookupConfig( xDeviceIDs[ xTimer ] );
 		configASSERT( pxTimerConfiguration );
 
+		#if 0
 		pxTimerSettings = &( xTimerSettings[ xTimer ] );
 
 		/* Initialise the device. */
@@ -160,6 +161,7 @@ const uint8_t ucRisingEdge = 3;
 		XTtcPs_SetInterval( pxTimerInstance, pxTimerSettings->Interval );
 		XTtcPs_SetPrescaler( pxTimerInstance, pxTimerSettings->Prescaler );
 
+		#endif
 		/* The priority must be the lowest possible. */
 		XScuGic_SetPriorityTriggerType( &xInterruptController, xInterruptIDs[ xTimer ], uxInterruptPriorities[ xTimer ] << portPRIORITY_SHIFT, ucRisingEdge );
 
@@ -175,6 +177,7 @@ const uint8_t ucRisingEdge = 3;
 
 		/* Start the timer. */
 		XTtcPs_Start( pxTimerInstance );
+
 	}
 }
 /*-----------------------------------------------------------*/
