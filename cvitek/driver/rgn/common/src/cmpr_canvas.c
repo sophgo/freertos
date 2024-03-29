@@ -149,49 +149,49 @@ int obj_project_on_line(DRAW_OBJ *obj_vec, uint32_t obj_num, dlist_t *slc_list_h
 				float delta_x0 = obj_attr.line._mx * (y - obj_attr.line._by[0]);
 
 				pt_x0 = obj_attr.line._bx[0] + delta_x0;
-				if (obj_attr.line._ex[0] > obj_attr.line._ey[0])
-					pt_x0 = clip((int)pt_x0, (int)obj_attr.line._bx[0], (int)obj_attr.line._ex[0]);
+				if (obj_attr.line._bx[0] > obj_attr.line._ex[0])
+					pt_x0 = clip((int)pt_x0, (int)(obj_attr.line._bx[1] + obj_attr.line.ts_h), (int)obj_attr.line._bx[0]);
 				else
-					pt_x0 = clip((int)pt_x0, (int)obj_attr.line._ex[0], (int)obj_attr.line._bx[0]);
+					pt_x0 = clip((int)pt_x0, (int)obj_attr.line._bx[0], (int)(obj_attr.line._bx[1] + obj_attr.line.ts_h));
 				float width = (y - obj_attr.line._by[0]) *
 						(obj_attr.line.ts_h / (obj_attr.line._by[1] -
 						obj_attr.line._by[0]));
 
 				pt_x1 = pt_x0 - width;
-				if (obj_attr.line._ex[0] > obj_attr.line._ey[0])
-					pt_x1 = clip((int)pt_x1, (int)obj_attr.line._bx[0], (int)obj_attr.line._ex[0]);
+				if (obj_attr.line._bx[0] > obj_attr.line._ex[0])
+					pt_x1 = clip((int)pt_x1, (int)obj_attr.line._bx[0], (int)obj_attr.line._bx[1]);
 				else
-					pt_x1 = clip((int)pt_x1, (int)obj_attr.line._ex[0], (int)obj_attr.line._bx[0]);
+					pt_x1 = clip((int)pt_x1, (int)obj_attr.line._bx[1], (int)obj_attr.line._bx[0]);
 			} else if (is_in_range(y, (int)round(obj_attr.line._by[1]),
 					   (int)round(obj_attr.line._ey[0]))) {
 				float delta_x0 = obj_attr.line._mx * (y - obj_attr.line._by[0]);
 
 				pt_x0 = obj_attr.line._bx[0] + delta_x0;
-				if (obj_attr.line._ex[0] > obj_attr.line._ey[0])
-					pt_x0 = clip((int)pt_x0, (int)obj_attr.line._bx[1], (int)obj_attr.line._ex[0]);
+				if (obj_attr.line._bx[0] > obj_attr.line._ex[0])
+					pt_x0 = clip((int)pt_x0, (int)obj_attr.line._ex[0], (int)(obj_attr.line._bx[1] + obj_attr.line._mx));
 				else
-					pt_x0 = clip((int)pt_x0, (int)obj_attr.line._ex[0], (int)obj_attr.line._bx[1]);
+					pt_x0 = clip((int)pt_x0, (int)(obj_attr.line._bx[1] + obj_attr.line._mx), (int)obj_attr.line._ex[0]);
 				pt_x1 = pt_x0 - obj_attr.line.ts_h;
-				if (obj_attr.line._ex[0] > obj_attr.line._ey[0])
-					pt_x1 = clip((int)pt_x1, (int)obj_attr.line._bx[1], (int)obj_attr.line._ex[0]);
+				if (obj_attr.line._bx[0] > obj_attr.line._ex[0])
+					pt_x1 = clip((int)pt_x1, (int)(obj_attr.line._ex[0] - obj_attr.line._mx), (int)obj_attr.line._bx[1]);
 				else
-					pt_x1 = clip((int)pt_x1, (int)obj_attr.line._ex[0], (int)obj_attr.line._bx[1]);
+					pt_x1 = clip((int)pt_x1, (int)obj_attr.line._bx[1], (int)(obj_attr.line._ex[0] - obj_attr.line._mx));
 			} else {
 				float delta_x0 = obj_attr.line._mx * (y - obj_attr.line._by[1]);
 
 				pt_x0 = obj_attr.line._bx[1] + delta_x0;
-				if (obj_attr.line._ex[0] > obj_attr.line._ey[0])
-					pt_x0 = clip((int)pt_x0, (int)obj_attr.line._bx[0], (int)obj_attr.line._ex[1]);
+				if (obj_attr.line._bx[0] > obj_attr.line._ex[0])
+					pt_x0 = clip((int)pt_x0, (int)obj_attr.line._ex[1], (int)(obj_attr.line._ex[0] - obj_attr.line.ts_h));
 				else
-					pt_x0 = clip((int)pt_x0, (int)obj_attr.line._ex[1], (int)obj_attr.line._bx[0]);
+					pt_x0 = clip((int)pt_x0, (int)(obj_attr.line._ex[0] - obj_attr.line.ts_h), (int)obj_attr.line._ex[1]);
 				float width = (obj_attr.line._ey[1] - y) *
 						(obj_attr.line.ts_h / (obj_attr.line._ey[1] - obj_attr.line._ey[0]));
 
 				pt_x1 = pt_x0 + width;
-				if (obj_attr.line._ex[0] > obj_attr.line._ey[0])
-					pt_x1 = clip((int)pt_x1, (int)obj_attr.line._bx[0], (int)obj_attr.line._ex[1]);
+				if (obj_attr.line._bx[0] > obj_attr.line._ex[0])
+					pt_x1 = clip((int)pt_x1, (int)obj_attr.line._ex[0], (int)obj_attr.line._ex[1]);
 				else
-					pt_x1 = clip((int)pt_x1, (int)obj_attr.line._ex[1], (int)obj_attr.line._bx[0]);
+					pt_x1 = clip((int)pt_x1, (int)obj_attr.line._ex[1], (int)obj_attr.line._ex[0]);
 			}
 			slc->slice.x0 = clip((int)round(MIN(pt_x0, pt_x1)), 0, canvas_width-1);
 			slc->slice.x1 = clip((int)round(MAX(pt_x0, pt_x1)), 0, canvas_width-1);
@@ -839,6 +839,13 @@ void set_line_obj_attr(DRAW_OBJ *obj_attr, Canvas_Attr *canvas,
 			(obj_attr->line._bx[0] +
 			obj_attr->line._mx * (obj_attr->line._by[1] - obj_attr->line._by[0])) -
 			obj_attr->line._bx[1];
+		if (obj_attr->line.ts_h > 0)
+			obj_attr->line.ts_h = clip((int)obj_attr->line.ts_h, 0
+				, (int)(obj_attr->line._ex[0] - obj_attr->line._bx[0]));
+		else
+			obj_attr->line.ts_h = clip((int)obj_attr->line.ts_h
+				, (int)(obj_attr->line._ex[0] - obj_attr->line._bx[0]), 0);
+
 		obj_attr->_min_y =
 			(int)round(MIN(obj_attr->line._by[0], obj_attr->line._by[1]));
 		obj_attr->_max_y =
