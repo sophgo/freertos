@@ -61,6 +61,7 @@ typedef struct {
 	};
 	COLOR color;
 	uint16_t id;
+	uint8_t bit_idx;
 } SEGMENT;
 
 typedef struct {
@@ -83,6 +84,8 @@ typedef struct {
 		uint32_t stride;
 		uint32_t bs_offset;
 	};
+	bool onebit_mode;
+	uint32_t fg_color;
 } BITMAP_ATTR;
 
 typedef struct {
@@ -124,8 +127,8 @@ void set_rect_obj_attr(DRAW_OBJ *obj, Canvas_Attr *canvas, uint32_t color_code,
 			   int pt_x, int pt_y, int width, int height,
 			   bool is_filled, int thickness);
 void set_bitmap_obj_attr(DRAW_OBJ *obj_attr, Canvas_Attr *canvas, uint8_t *buf,
-			 int pt_x, int pt_y, int width, int height,
-			 bool is_cmpr);
+			 int pt_x, int pt_y, int width, int height, bool is_cmpr,
+			 bool onebit_mode, uint32_t fg_color);
 void set_line_obj_attr(DRAW_OBJ *obj, Canvas_Attr *canvas, uint32_t color_code,
 			   int pt_x0, int pt_y0, int pt_x1, int pt_y1,
 			   int thickness);
@@ -155,7 +158,8 @@ void CVI_OSDC_set_rect_obj_attr(Canvas_Attr *canvas, DRAW_OBJ *obj, uint32_t col
 				int pt_x, int pt_y, int width, int height, bool is_filled, int thickness);
 
 void CVI_OSDC_set_bitmap_obj_attr(Canvas_Attr *canvas, DRAW_OBJ *obj_attr, uint8_t *buf,
-				  int pt_x, int pt_y, int width, int height, bool is_cmpr);
+				  int pt_x, int pt_y, int width, int height, bool is_cmpr,
+				  bool onebit_mode, uint32_t fg_color);
 
 void CVI_OSDC_set_line_obj_attr(Canvas_Attr *canvas, DRAW_OBJ *obj, uint32_t color_code,
 				int pt_x0, int pt_y0, int pt_x1, int pt_y1, int thickness);

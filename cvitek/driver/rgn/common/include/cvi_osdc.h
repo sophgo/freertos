@@ -19,7 +19,8 @@ void CVI_OSDC_SetRectObjAttr(OSDC_Canvas_Attr_S *canvas, OSDC_DRAW_OBJ_S *obj, u
 				int pt_x, int pt_y, int width, int height, bool is_filled, int thickness);
 
 void CVI_OSDC_SetBitmapObjAttr(OSDC_Canvas_Attr_S *canvas, OSDC_DRAW_OBJ_S *obj_attr, uint8_t *buf,
-				  int pt_x, int pt_y, int width, int height, bool is_cmpr);
+				  int pt_x, int pt_y, int width, int height, bool is_cmpr, bool onebit_mode,
+				  uint32_t fg_color);
 
 void CVI_OSDC_SetLineObjAttr(OSDC_Canvas_Attr_S *canvas, OSDC_DRAW_OBJ_S *obj, uint32_t color_code,
 				int pt_x0, int pt_y0, int pt_x1, int pt_y1, int thickness);
@@ -36,7 +37,8 @@ extern void CVI_OSDC_set_rect_obj_attr(OSDC_Canvas_Attr_S *canvas, OSDC_DRAW_OBJ
 				int pt_x, int pt_y, int width, int height, bool is_filled, int thickness);
 
 extern void CVI_OSDC_set_bitmap_obj_attr(OSDC_Canvas_Attr_S *canvas, OSDC_DRAW_OBJ_S *obj_attr, uint8_t *buf,
-				  int pt_x, int pt_y, int width, int height, bool is_cmpr);
+				  int pt_x, int pt_y, int width, int height, bool is_cmpr, bool onebit_mode,
+				  uint32_t fg_color);
 
 extern void CVI_OSDC_set_line_obj_attr(OSDC_Canvas_Attr_S *canvas, OSDC_DRAW_OBJ_S *obj, uint32_t color_code,
 				int pt_x0, int pt_y0, int pt_x1, int pt_y1, int thickness);

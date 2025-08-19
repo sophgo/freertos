@@ -63,6 +63,8 @@ typedef struct _OSDC_BITMAP_ATTR_S {
 		uint32_t stride;
 		uint32_t bs_offset;
 	};
+	bool onebit_mode;
+	uint32_t fg_color;
 } OSDC_BITMAP_ATTR_S;
 
 typedef union _OSDC_COLOR_S {

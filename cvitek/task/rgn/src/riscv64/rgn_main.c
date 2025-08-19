@@ -63,14 +63,14 @@ void prvRGNRunTask(void *pvParameters)
 		canvas_cmpr_attr = (RGN_CANVAS_CMPR_ATTR_S *)rtos_cmdq.param_ptr;
 		inv_dcache_range((uintptr_t)canvas_cmpr_attr, ALIGN(sizeof(RGN_CANVAS_CMPR_ATTR_S), 64));
 		inv_dcache_range((uintptr_t)canvas_cmpr_attr, ALIGN(canvas_cmpr_attr->u32BsSize, 64));
-		rgn_printf("phyAddr(%x) u32Width(%d) u32Height(%d) u32BgColor(%x) enPixelFormat(%d) u32ObjNum(%d)\n",
+		printf("phyAddr(%x) u32Width(%d) u32Height(%d) u32BgColor(%x) enPixelFormat(%d) u32ObjNum(%d)\n",
 			rtos_cmdq.param_ptr,
 			canvas_cmpr_attr->u32Width,
 			canvas_cmpr_attr->u32Height,
 			canvas_cmpr_attr->u32BgColor,
 			canvas_cmpr_attr->enPixelFormat,
 			canvas_cmpr_attr->u32ObjNum);
-		rgn_printf("u32BsSize(%d)\n", canvas_cmpr_attr->u32BsSize);
+		printf("u32BsSize(%d)\n", canvas_cmpr_attr->u32BsSize);
 
 		canvas.width = canvas_cmpr_attr->u32Width;
 		canvas.height = canvas_cmpr_attr->u32Height;
@@ -82,6 +82,7 @@ void prvRGNRunTask(void *pvParameters)
 			rgn_printf("(%s) malloc failed!\n", __func__);
 			goto WRONG_CMD_IP_ID;
 		}
+		memset(obj_vec, 0, (obj_num ? obj_num : 1) * sizeof(OSDC_DRAW_OBJ_S));
 
 		obj_attr = (RGN_CMPR_OBJ_ATTR_S *)((CVI_U8 *)rtos_cmdq.param_ptr + sizeof(RGN_CANVAS_CMPR_ATTR_S));
 		if (obj_num) {
@@ -110,7 +111,9 @@ void prvRGNRunTask(void *pvParameters)
 						obj_attr[i].stBitmap.stRect.s32Y,
 						obj_attr[i].stBitmap.stRect.u32Width,
 						obj_attr[i].stBitmap.stRect.u32Height,
-						obj_attr[i].stBitmap.u32BitmapPAddr);
+						obj_attr[i].stBitmap.u32BitmapPAddr,
+						obj_attr[i].stBitmap.bOnebitMode,
+						obj_attr[i].stBitmap.u32FgColor);
 				}
 			}
 		}
@@ -147,7 +150,9 @@ void prvRGNRunTask(void *pvParameters)
 						obj_attr[i].stBitmap.stRect.s32Y,
 						obj_attr[i].stBitmap.stRect.u32Width,
 						obj_attr[i].stBitmap.stRect.u32Height,
-						false);
+						false,
+						obj_attr[i].stBitmap.bOnebitMode,
+						obj_attr[i].stBitmap.u32FgColor);
 				}
 			}
 		}

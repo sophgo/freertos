@@ -19,9 +19,11 @@ void CVI_OSDC_SetRectObjAttr(OSDC_Canvas_Attr_S *canvas, OSDC_DRAW_OBJ_S *obj, u
 }
 
 void CVI_OSDC_SetBitmapObjAttr(OSDC_Canvas_Attr_S *canvas, OSDC_DRAW_OBJ_S *obj_attr, uint8_t *buf,
-				int pt_x, int pt_y, int width, int height, bool is_cmpr)
+				int pt_x, int pt_y, int width, int height, bool is_cmpr, bool onebit_mode,
+				uint32_t fg_color)
 {
-	CVI_OSDC_set_bitmap_obj_attr(canvas, obj_attr, buf,  pt_x, pt_y, width, height, is_cmpr);
+	CVI_OSDC_set_bitmap_obj_attr(canvas, obj_attr, buf,  pt_x, pt_y, width, height, is_cmpr,
+					onebit_mode, fg_color);
 }
 
 void CVI_OSDC_SetLineObjAttr(OSDC_Canvas_Attr_S *canvas, OSDC_DRAW_OBJ_S *obj, uint32_t color_code,

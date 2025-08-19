@@ -16,23 +16,33 @@ static bool is_in_range(int x, int begin, int end)
 	return (x >= begin && x < end);
 }
 
-int count_repeat_pixel(uint8_t *src, int pixel_sz, int pixel_num)
+int count_repeat_pixel(uint8_t *src, int pixel_sz, int pixel_num,
+			bool onebit_mode, int bit_index)
 {
 	int num = pixel_num - 1;
 
-	for (int byte_i = 0; byte_i < pixel_sz; byte_i++) {
-		uint8_t ref = src[byte_i];
-		uint8_t *cur_ptr = &src[byte_i + pixel_sz];
-
+	if (onebit_mode) {
+		uint8_t ref = (src[0] >> (7 - bit_index)) & 0x01;
 		for (int cnt = 0; cnt < num; cnt++) {
-			if (ref != (*cur_ptr)) {
+			if (ref != (((src[(cnt + bit_index) >> 3]) >> (7 - ((cnt + bit_index) % 8))) & 0x01)) {
 				num = cnt;
 				break;
 			}
-			cur_ptr += pixel_sz;
+		}
+	} else {
+		for (int byte_i = 0; byte_i < pixel_sz; byte_i++) {
+			uint8_t ref = src[byte_i];
+			uint8_t *cur_ptr = &src[byte_i + pixel_sz];
+
+			for (int cnt = 0; cnt < num; cnt++) {
+				if (ref != (*cur_ptr)) {
+					num = cnt;
+					break;
+				}
+				cur_ptr += pixel_sz;
+			}
 		}
 	}
-
 	return num + 1;
 }
 
@@ -341,13 +351,28 @@ void draw_cmpr_canvas_line(Cmpr_Canvas_Ctrl *ctrl, DRAW_OBJ *obj_vec,
 				obj_vec[segment->id].bitmap.bs_offset += *(segment->bs_len);
 				segment->bs_len++;
 			} else {
+				uint8_t *cur_pixel = NULL;
+				uint8_t *cur_ptr = NULL;
+				uint8_t pixel = 0x0;
+				bool onebit_mode = obj_vec[segment->id].bitmap.onebit_mode;
+				int bit_index = 0;
 				for (int pel_i = 0; pel_i < segment->width; pel_i += rep_cnt) {
-					uint8_t *cur_ptr = &src_ptr[pel_i * pixel_sz];
+					if (onebit_mode) {
+						int byte_index = (pel_i + segment->bit_idx) >> 3;
+						bit_index = (pel_i + segment->bit_idx) % 8;
+						cur_ptr = &src_ptr[byte_index];
+						cur_pixel = (cur_ptr[0] >> (7 - bit_index) & 0x01) == 0 ?
+								&pixel :
+								&obj_vec[segment->id].bitmap.fg_color;
+					} else {
+						cur_ptr = &src_ptr[pel_i * pixel_sz];
+						cur_pixel = cur_ptr;
+					}
+					rep_cnt = count_repeat_pixel(cur_ptr, pixel_sz, segment->width - pel_i, onebit_mode, bit_index);
 
-					rep_cnt = count_repeat_pixel(cur_ptr, pixel_sz, segment->width - pel_i);
-					draw_cmpr_pixel(cur_ptr, rep_cnt, y == 0 && i == 0 && pel_i == 0, ctrl);
+					draw_cmpr_pixel(cur_pixel, rep_cnt, y == 0 && i == 0 && pel_i == 0, ctrl);
 				}
-				segment->color.buf += (segment->stride * pixel_sz);
+				segment->color.buf += onebit_mode ? (segment->stride >> 3) : (segment->stride * pixel_sz);
 			}
 		}
 		i++;
@@ -462,17 +487,23 @@ void plot_segments_on_line(DRAW_OBJ *obj_vec, uint32_t obj_num,
 				seg->segment.is_cmpr =
 					(obj->type == BIT_MAP) ? false : true;
 				int incr_y = y - obj->bitmap.rect.y;
+				int length = 0;
+				uint8_t bit_idx = 0;
 
 				if (!seg->segment.is_cmpr) {
 					seg->segment.stride = obj->bitmap.stride;
-					seg->segment.color.buf = obj->color.buf + ((incr_y * seg->segment.stride) +
-						(x - slice_cur->slice.x0)) * pixel_sz;
+					length = obj->bitmap.onebit_mode ? ((incr_y * seg->segment.stride) + (x - slice_cur->slice.x0)) >> 3
+						: ((incr_y * seg->segment.stride) + (x - slice_cur->slice.x0)) * pixel_sz;
+					bit_idx = obj->bitmap.onebit_mode ? ((incr_y * seg->segment.stride) + (x - slice_cur->slice.x0)) % 8
+						: 0;
+					seg->segment.color.buf = obj->color.buf + length;
+					seg->segment.bit_idx = bit_idx;
 				} else {
 					seg->segment.color.buf =
 						&obj->color.buf[obj->bitmap.bs_offset];
 					seg->segment.bs_len = &((uint16_t *)obj->color.buf)[incr_y];
-					seg->segment.id = slice_cur->slice.obj_id;
 				}
+				seg->segment.id = slice_cur->slice.obj_id;
 			}
 			// slices required recycle only when current segment is not background
 			int recycle_cnt = recycle_obj_slices(&slc_list_head, obj_idx,  x + step);
@@ -749,7 +780,7 @@ int cmpr_bitmap(Canvas_Attr *canvas, uint8_t *ibuf, uint8_t *obuf, int width,
 
 		for (int x = 0; x < width; x += step) {
 			int cnt = count_repeat_pixel(cur_ptr, pixel_sz,
-							 width - x);
+							 width - x, 0, 0);
 			step = cnt;
 			while (cnt > 0) {
 				int new_bs_sz_cnt = bs_sz_cnt + rl_pair_sz;
@@ -810,7 +841,8 @@ void set_rect_obj_attr(DRAW_OBJ *obj_attr, Canvas_Attr *canvas,
 }
 
 void set_bitmap_obj_attr(DRAW_OBJ *obj_attr, Canvas_Attr *canvas, uint8_t *buf,
-			 int pt_x, int pt_y, int width, int height, bool is_cmpr)
+			 int pt_x, int pt_y, int width, int height, bool is_cmpr,
+			 bool onebit_mode, uint32_t fg_color)
 {
 	if (is_cmpr) {
 		obj_attr->type = CMPR_BIT_MAP;
@@ -824,6 +856,8 @@ void set_bitmap_obj_attr(DRAW_OBJ *obj_attr, Canvas_Attr *canvas, uint8_t *buf,
 	obj_attr->color.buf = buf;
 	obj_attr->_max_y = obj_attr->bitmap.rect.y + obj_attr->bitmap.rect.height;
 	obj_attr->_min_y = obj_attr->bitmap.rect.y;
+	obj_attr->bitmap.onebit_mode = onebit_mode;
+	obj_attr->bitmap.fg_color = fg_color;
 }
 
 void set_line_obj_attr(DRAW_OBJ *obj_attr, Canvas_Attr *canvas,
@@ -931,9 +965,11 @@ void CVI_OSDC_set_rect_obj_attr(Canvas_Attr *canvas, DRAW_OBJ *obj, uint32_t col
 }
 
 void CVI_OSDC_set_bitmap_obj_attr(Canvas_Attr *canvas, DRAW_OBJ *obj_attr, uint8_t *buf,
-				int pt_x, int pt_y, int width, int height, bool is_cmpr)
+				int pt_x, int pt_y, int width, int height, bool is_cmpr,
+				bool onebit_mode, uint32_t fg_color)
 {
-	set_bitmap_obj_attr(obj_attr, canvas, buf,  pt_x, pt_y, width, height, is_cmpr);
+	set_bitmap_obj_attr(obj_attr, canvas, buf,  pt_x, pt_y, width, height, is_cmpr,
+				onebit_mode, fg_color);
 }
 
 void CVI_OSDC_set_line_obj_attr(Canvas_Attr *canvas, DRAW_OBJ *obj, uint32_t color_code,
