@@ -1,0 +1,8 @@
+# ninja log v5
+1	51	1756472152404953850	riscv64/CMakeFiles/arch.dir/src/start.S.obj	b033b556618fae4d
+3	53	1756472152408953867	riscv64/CMakeFiles/arch.dir/src/vectors.S.obj	abbc330493ce3711
+0	76	1756472152432953961	riscv64/CMakeFiles/arch.dir/src/arch_sleep.c.obj	ff6e88e169edf269
+1	165	1756472152520954313	riscv64/CMakeFiles/arch.dir/src/cache.c.obj	2032ad8ce530a5cd
+2	190	1756472152544954409	riscv64/CMakeFiles/arch.dir/src/trap_c.c.obj	31cefeb91ff7fcff
+190	213	1756472152568954505	riscv64/libarch.a	26cfd9b642c935b3
+213	231	0	CMakeFiles/install.util	946423557a1a2b3f

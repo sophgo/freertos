@@ -1,0 +1,7 @@
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/build/common/CMakeFiles/install/strip.dir
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/build/common/CMakeFiles/install/local.dir
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/build/common/CMakeFiles/install.dir
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/build/common/CMakeFiles/list_install_components.dir
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/build/common/CMakeFiles/rebuild_cache.dir
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/build/common/CMakeFiles/edit_cache.dir
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/build/common/CMakeFiles/common.dir

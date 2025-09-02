@@ -1,0 +1,16 @@
+# ninja log v5
+3	58	1756472153148956820	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Source/portable/GCC/RISC-V/portASM.S.obj	6df043fb246102c9
+0	68	1756472153160956868	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Source/croutine.c.obj	c283101994cc00eb
+9	72	1756472153164956884	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Tracealyzer/src/trcStreamingRecorder.c.obj	7bc3dd96925b8494
+7	82	1756472153172956916	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Tracealyzer/src/trcKernelPort.c.obj	3a62e1b24226cda1
+8	83	1756472153176956932	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Tracealyzer/src/trcSnapshotRecorder.c.obj	26f1c2be9ff20652
+2	102	1756472153192956995	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Source/list.c.obj	18757a56fce59fd0
+2	107	1756472153200957028	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Source/portable/GCC/RISC-V/port.c.obj	ae3c5ff5b13611f0
+4	150	1756472153240957188	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Source/portable/MemMang/heap_4.c.obj	512b8045b1ec3fad
+1	154	1756472153248957220	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Source/event_groups.c.obj	8e44a8ec04725d52
+6	215	1756472153308957459	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Source/timers.c.obj	cda348b3137d13a2
+5	244	1756472153336957570	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Source/stream_buffer.c.obj	b4e38556cc3211be
+4	364	1756472153456958049	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Source/queue.c.obj	e7840ef50b8d36cc
+6	587	1756472153680958944	CMakeFiles/kernel.dir/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/Source/tasks.c.obj	29cd399dcec13bdb
+587	626	1756472153720959103	libkernel.a	74dd072ad2f07722
+627	657	0	CMakeFiles/install.util	fc4a669c3ad904e4

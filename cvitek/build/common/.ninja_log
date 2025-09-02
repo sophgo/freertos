@@ -1,0 +1,14 @@
+# ninja log v5
+3	52	1756472154300961419	CMakeFiles/common.dir/src/riscv64/riscv_optimized/memcpy.S.obj	3fcd6f5a4f9b6043
+4	52	1756472154300961419	CMakeFiles/common.dir/src/riscv64/riscv_optimized/memset.S.obj	11a46a1f3368ae6b
+5	78	1756472154324961514	CMakeFiles/common.dir/src/riscv64/sleep.c.obj	8d8a9c2a1efae922
+0	88	1756472154336961562	CMakeFiles/common.dir/src/riscv64/malloc.c.obj	446ab7b6ed4d789e
+1	88	1756472154336961562	CMakeFiles/common.dir/src/riscv64/memset.c.obj	efa4c8f41fa88f1c
+3	94	1756472154340961579	CMakeFiles/common.dir/src/riscv64/puts.c.obj	bdd81c5d5ec42a33
+2	94	1756472154340961579	CMakeFiles/common.dir/src/riscv64/putchar.c.obj	1f4c111181f1d4d
+6	99	1756472154348961611	CMakeFiles/common.dir/src/riscv64/strncpy.c.obj	ab73683c2af88f43
+2	102	1756472154348961611	CMakeFiles/common.dir/src/riscv64/printf.c.obj	c01b649cf7a7f4ab
+7	103	1756472154352961626	CMakeFiles/common.dir/src/riscv64/time.c.obj	2547f6c3fe5fe28
+5	159	1756472154408961851	CMakeFiles/common.dir/src/riscv64/snprintf.c.obj	f17f78303ac38867
+159	181	1756472154432961946	libcommon.a	608e27a7961583fa
+181	203	0	CMakeFiles/install.util	c374b49ca5a9fa7c

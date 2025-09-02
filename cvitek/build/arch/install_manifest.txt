@@ -1,0 +1,14 @@
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/lib/libarch.a
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/arch_cpu.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/arch_helpers.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/arch_sleep.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/arch_time.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/core_rv64.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/csi_core.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/csi_rv64_gcc.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/csr.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/io.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/irq.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/ptrace.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/riscv-reg.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/arch/riscv-virt.h

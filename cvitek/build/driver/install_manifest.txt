@@ -1,0 +1,12 @@
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/driver/pinmux/pinmux.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/driver/uart/dump_uart.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/driver/uart/uart.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/driver/spinlock/cvi_spinlock.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/driver/gpio/gpio.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/driver/rgn/cmpr_canvas.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/driver/rgn/cvi_comm_osdc.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/driver/rgn/cvi_osdc.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/driver/rgn/osd_cmpr.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/driver/rtos_cmdqu/rtos_cmdqu.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/include/driver/fast_image/fast_image.h
+/root/.jenkins/workspace/mars3_dev_daily_build/mars3_source/freertos/cvitek/install/lib/libdriver.a
