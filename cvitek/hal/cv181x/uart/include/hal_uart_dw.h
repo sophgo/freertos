@@ -14,7 +14,7 @@ struct dw_regs {
 	volatile uint8_t ier; /* 0x04 Interrupt Enable Register */
 	volatile uint8_t fcr; /* 0x08 FIFO Control Register */
 	volatile uint8_t lcr; /* 0x0C Line control register */
-	volatile uint8_t mcr; /* 0x10 Line control register */
+	volatile uint8_t mcr; /* 0x10 Modem Control Register */
 	volatile uint8_t lsr; /* 0x14 Line Status Register */
 	volatile uint8_t msr; /* 0x18 Modem Status Register */
 	volatile uint8_t spr; /* 0x20 Scratch Register */
@@ -26,7 +26,7 @@ struct dw_regs {
 	volatile uint32_t ier; /* 0x04 Interrupt Enable Register */
 	volatile uint32_t fcr; /* 0x08 FIFO Control Register */
 	volatile uint32_t lcr; /* 0x0C Line control register */
-	volatile uint32_t mcr; /* 0x10 Line control register */
+	volatile uint32_t mcr; /* 0x10 Modem Control Register */
 	volatile uint32_t lsr; /* 0x14 Line Status Register */
 	volatile uint32_t msr; /* 0x18 Modem Status Register */
 	volatile uint32_t spr; /* 0x20 Scratch Register */
